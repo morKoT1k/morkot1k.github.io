@@ -1,11 +1,10 @@
- // Variables
+// Variables
 const form = document.querySelector('#form');
 const taskInput = document.querySelector('#taskInput');
 const tasksList = document.querySelector('#tasksList');
 const emptyList = document.querySelector('#emptyList');
 
-
-  // Logic
+// Logic
 
 
  let tasks = [];
@@ -21,7 +20,6 @@ const emptyList = document.querySelector('#emptyList');
  form.addEventListener('submit', addTask);
  tasksList.addEventListener('click', deleteTask);
  tasksList.addEventListener('click', doneTask);
- tasksList.addEventListener('click', addDescForm);
 
 
  // Functions
@@ -33,6 +31,7 @@ const emptyList = document.querySelector('#emptyList');
           id : Date.now(),
           text : taskText,
           done : false,
+          desc : null,
       }
 
       tasks.push(newTask);
@@ -60,7 +59,6 @@ const emptyList = document.querySelector('#emptyList');
     }
 }
 
-
   function doneTask(event){
   if (event.target.dataset.action === 'done'){
      const parenNode = event.target.closest('li');
@@ -82,7 +80,7 @@ const emptyList = document.querySelector('#emptyList');
                                      <div class="empty-list__title">No tasks left to do today, keep it up !</div>
                                     </li>
                                           `
-          tasksList.insertAdjacentHTML('afterbegin', emptyListHTML);
+          tasksList.insertAdjacentHTML('beforeend', emptyListHTML);
       }
 
       if(tasks.length > 0 ){
@@ -92,27 +90,42 @@ const emptyList = document.querySelector('#emptyList');
 
   }
 
-  function addDescForm(event){
-      if(event.target.dataset.action === 'description'){
-          const descHtml = `<form id="formDescription" onSubmit="addDescription()">
-                             <div className="form-group">
-                                <input type="text" className="form-control" id="descInput" placeholder="Write it down here" required>
-                                <small id="descriptionText" className="form-text text-muted"></small>
-                             </div>
-                            <button type="submit" className="btn btn-primary  btn-lg active">Add</button>
+   function addDescForm()
+      {
+        const descFormHtml = `<form id="formDescription">
+                             <div class="form-group">
+                                <input type="text" class="form-control" id="descInput" placeholder="Write it down here" maxlength="20">
+                             </div class = "form-group">
+                            <button id = "saveDescription" type="button" data-action="saveDescription" className="btn btn-primary  btn-lg active">Add</button>
                             </form>`
-          tasksList.insertAdjacentHTML('beforeend', descHtml);
+        const time = document.querySelector('.card-2')
+        time.insertAdjacentHTML('beforeend', descFormHtml);
+
+    }
+
+
+  $(document).on("click", "#description", function (event) {
+      event.preventDefault();
+      addDescForm();
+      let dId = $(this).closest('li').attr('id');
+      let list = JSON.parse(localStorage.getItem("tasks"))
+      let i = findIndexOfDate(list, dId);
+      $(document).on("click", "#saveDescription", function (event) {
+          let descIn = $('#descInput').val()
+          console.log('this is i :' + i)
+      });
+  })
+
+
+
+      function saveToLocalStorage() {
+          localStorage.setItem('tasks', JSON.stringify(tasks))
+
       }
- }
 
- function saveToLocalStorage()
- {
-     localStorage.setItem('tasks', JSON.stringify(tasks))
-
- }
-   function renderTask(task){
-       const cssClass = task.done ? "task-title task-title--done" : "task-title" // css class
-       const taskHTML = `<li id ="${task.id}"  class="list-group-item d-flex justify-content-between task-item">
+      function renderTask(task) {
+          const cssClass = task.done ? "task-title task-title--done" : "task-title" // css class
+          const taskHTML = `<li id ="${task.id}"  class="list-group-item d-flex justify-content-between task-item">
                         <span class="${cssClass}">${task.text}</span>
                         <div class="task-item__buttons">
                             <button type="button" data-action="done" class="btn-action">
@@ -121,25 +134,24 @@ const emptyList = document.querySelector('#emptyList');
                             <button type="button" data-action="delete" class="btn-action">
                                 <img src="./img/cross.png" alt="Done" width="18" height="18">
                             </button>
-                            <button type="button" data-action="description" class="btn-action">
+                            <button type="button" id = 'description' data-action="description" class="btn-action">
                                 <img src="./img/pencil_and_paper.png" alt="Done" width="18" height="18">
                             </button>   
                         </div>
                     </li>`;
 
-       tasksList.insertAdjacentHTML('beforeend', taskHTML); // add task on page
-   }
+          tasksList.insertAdjacentHTML('beforeend', taskHTML); // add task on page
+      }
 
 
- function addDescription(event) {
 
-      let descInput = document.getElementById("descInput").value;
-      const newDescription = document.createElement('small');
-      newDescription.innerHTML = descInput;
-      tasksList.appendChild(newDescription);
-
+ function findIndexOfDate(list, dId) {
+     const index = list.findIndex(
+         (element) => element.id == dId
+     );
+     //return index;
+     return index;
  }
-
 
 
 
